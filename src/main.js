@@ -57,7 +57,7 @@ async function controller() {
 
         doorAccessory
           .getService(Service.GarageDoorOpener)
-          .setCharacteristic(Characteristic.CurrentDoorState, doorStaet);
+          .setCharacteristic(Characteristic.CurrentDoorState, doorState);
       }
       else if (value == Characteristic.TargetDoorState.OPEN) {
         doorAccessory
