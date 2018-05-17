@@ -11,9 +11,9 @@ const readValue = () => {
     return new Promise((fulfill) => {
         gpio.setup(config.door.pins.closed, gpio.DIR_IN, function () {
             gpio.read(config.door.pins.closed, function(err, value) {
-                debug('readValue', !value);
+                debug('readValue', value);
 
-                fulfill(!value);
+                fulfill(value);
             });
         });
     });
