@@ -118,7 +118,7 @@ async function setCurrentDoorState(doorAccessory, now) {
         const doorState = await currentDoorState();
 
         setDoorState(doorAccessory, Service.GarageDoorOpener, Characteristic.CurrentDoorState, doorState)
-      }, 10000);
+      }, 3600000); //door state refreshes automatically every hour
     }
 }
 
