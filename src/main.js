@@ -86,9 +86,11 @@ async function controller() {
 
       if (await doorController.isDoorOpened()) {
         debug('door is open');
+        setCurrentDoorState(doorAccessory, true);
         callback(err, Characteristic.CurrentDoorState.OPEN);
       } else {
         debug('door is closed');
+        setCurrentDoorState(doorAccessory, true);
         callback(err, Characteristic.CurrentDoorState.CLOSED);
       }
     });
@@ -100,22 +102,31 @@ async function controller() {
     pincode: config.door.accessory.pincode,
     category: Accessory.Categories.GARAGE_DOOR_OPENER,
   });
-  setCurrentDoorState(doorAccessory);
+  setCurrentDoorState(doorAccessory, false);
 }
 
-async function setCurrentDoorState(doorAccessory) {
+async function setCurrentDoorState(doorAccessory, now) {
   
   const currentDoorState = () => doorController.isDoorOpened()
     ? Characteristic.CurrentDoorState.OPEN
     : Characteristic.CurrentDoorState.CLOSED;    
+    if (now) {
+      const doorState = await currentDoorState();
+      setDoorState(doorAccessory, Service.GarageDoorOpener, Characteristic.CurrentDoorState, doorState)
+    } else {
+      setInterval(async function() {
+        const doorState = await currentDoorState();
 
-  setInterval(async function() {
-    const doorState = await currentDoorState();
-
-    doorAccessory
-      .getService(Service.GarageDoorOpener)
-      .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-  }, 10000);
+        setDoorState(doorAccessory, Service.GarageDoorOpener, Characteristic.CurrentDoorState, doorState)
+      }, 10000);
+    }
 }
+
+function setDoorState(accessory, service, state, value) {
+  accessory
+    .getService(service)
+    .setCharacteristic(state, value);
+}
+
 
 controller();
