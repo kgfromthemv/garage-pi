@@ -104,12 +104,9 @@ async function controller() {
 
         const doorState = await doorState();
 
-        if (value == Characteristic.CurrentDoorState.CLOSING) {
-          callback();
-          setTimeout(setDoorState(Service.GarageDoorOpener, Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSED), 8000);
-        } else if (value == Characteristic.CurrentDoorState.OPENING) {
-          callback();
-          setTimeout(setDoorState(Service.GarageDoorOpener, Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPEN), 8000);
+        if (value == Characteristic.CurrentDoorState.CLOSING || value == Characteristic.CurrentDoorState.OPENING) {
+          debug('door state closing || opening');
+          setTimeout(setDoorState(Service.GarageDoorOpener, Characteristic.CurrentDoorState, doorState), 8000);
         } else {
           callback();
         }
