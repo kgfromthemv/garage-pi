@@ -8,12 +8,16 @@ const closedPin = config.door.pins.closed;
 gpio.setMode(gpio.MODE_RPI);
 
 const readValue = () => {
-    return new Promise((fulfill) => {
+    return new Promise((fulfill, reject) => {
         gpio.setup(config.door.pins.closed, gpio.DIR_IN, function () {
             gpio.read(config.door.pins.closed, function(err, value) {
                 debug('readValue', value);
-                debug('gpio.read error', err);
-                fulfill(value);
+                if (err) {
+                    debug('gpio read error', err);
+                    reject(readValue());
+                } else {
+                    fulfill(value);
+                }
             });
         });
     });
