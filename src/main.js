@@ -104,11 +104,11 @@ async function controller() {
 async function setCurrentDoorState(doorAccessory) {
   
   const doorState = () => doorController.isDoorOpened()
-  ? Characteristic.TargetDoorState.OPEN
-  : Characteristic.TargetDoorState.CLOSED;
+    ? Characteristic.TargetDoorState.OPEN
+    : Characteristic.TargetDoorState.CLOSED;
 
-  setInterval(() => {
-    const doorState = doorState();
+  setInterval(async function() => {
+    const doorState = await doorState();
 
     doorAccessory
       .getService(Service.GarageDoorOpener)
