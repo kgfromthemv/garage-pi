@@ -25,7 +25,6 @@ async function controller() {
 
   doorAccessory.on('identify', function (paired, callback) {
     doorController.identify();
-
     callback();
   });
 
