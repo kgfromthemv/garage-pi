@@ -55,14 +55,6 @@ async function controller() {
 
         callback();
 
-        const doorState = await doorState();
-
-        doorAccessory
-          .getService(Service.GarageDoorOpener)
-          .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-
-        callback();
-
         await doorController.openDoor();
 
         const doorState = await doorState();
@@ -75,14 +67,6 @@ async function controller() {
         doorAccessory
           .getService(Service.GarageDoorOpener)
           .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
-
-        callback();
-
-        const doorState = await doorState();
-
-        doorAccessory
-          .getService(Service.GarageDoorOpener)
-          .setCharacteristic(Characteristic.CurrentDoorState, doorState);
 
         callback();
 
