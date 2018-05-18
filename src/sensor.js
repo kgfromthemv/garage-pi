@@ -14,13 +14,13 @@ const readValue = () => {
                 debug('readValue', value);
                 if (err) {
                     debug('gpio read error', err);
-                    reject(readValue());
+                    reject(err);
                 } else {
                     fulfill(value);
                 }
             });
         });
-    });
+    })
 }
 
 const isDoorClosed = async () => {

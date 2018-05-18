@@ -104,8 +104,12 @@ async function controller() {
 async function setCurrentDoorState(doorAccessory) {
   
   const doorState = () => doorController.isDoorOpened()
-    ? Characteristic.TargetDoorState.OPEN
-    : Characteristic.TargetDoorState.CLOSED;
+    ? Characteristic.CurrentDoorState.OPEN
+    : Characteristic.CurrentDoorState.CLOSED;
+
+    const doorState = await doorState();
+    
+    debug('setCurrentDoorState: doorState', doorState);
 
   setInterval(async function() {
     const doorState = await doorState();
