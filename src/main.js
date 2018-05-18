@@ -34,12 +34,6 @@ async function controller() {
 
   const initialDoorState = await doorState();
 
-  function setDoorState(service, state, value) {
-    doorAccessory
-      .getService(service)
-      .setCharacteristic(state, value);
-  };
-
   debug('initial door state', initialDoorState);
 
   doorAccessory
@@ -104,6 +98,22 @@ async function controller() {
     pincode: config.door.accessory.pincode,
     category: Accessory.Categories.GARAGE_DOOR_OPENER,
   });
+  setCurrentDoorState(doorAccessory);
+}
+
+async function setCurrentDoorState(doorAccessory) {
+  
+  const doorState = () => doorController.isDoorOpened()
+  ? Characteristic.TargetDoorState.OPEN
+  : Characteristic.TargetDoorState.CLOSED;
+
+  setInterval(() => {
+    const doorState = await doorState();
+
+    doorAccessory
+      .getService(Service.GarageDoorOpener)
+      .setCharacteristic(Characteristic.CurrentDoorState, doorState);
+  }, 10000);
 }
 
 controller();
