@@ -46,9 +46,10 @@ async function controller() {
         doorAccessory
           .getService(Service.GarageDoorOpener)
           .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
-
+        debug('after CLOSING, before callback()')
         callback();
-        setCurrentDoorState(doorAccessory);
+        debug('after CLOSING callback()')
+
         await doorController.openDoor();
 
         const doorState = await doorState();
@@ -61,9 +62,10 @@ async function controller() {
         doorAccessory
           .getService(Service.GarageDoorOpener)
           .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
-
+        debug('after OPENING, before callback()')
         callback();
-        setCurrentDoorState(doorAccessory);
+        debug('after OPENING callback()')
+
         await doorController.closeDoor();
 
         const doorState = await doorState();
@@ -107,13 +109,13 @@ async function setCurrentDoorState(doorAccessory) {
     ? Characteristic.CurrentDoorState.OPEN
     : Characteristic.CurrentDoorState.CLOSED;    
 
-  setTimeout(async function() {
+  setInterval(async function() {
     const doorState = await currentDoorState();
 
     doorAccessory
       .getService(Service.GarageDoorOpener)
       .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-  }, 10);
+  }, 10000);
 }
 
 controller();
