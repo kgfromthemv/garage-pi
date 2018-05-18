@@ -12,7 +12,7 @@ const readValue = () => {
         gpio.setup(config.door.pins.closed, gpio.DIR_IN, function () {
             gpio.read(config.door.pins.closed, function(err, value) {
                 debug('readValue', value);
-
+                debug('gpio.read error', err)
                 fulfill(value);
             });
         });
