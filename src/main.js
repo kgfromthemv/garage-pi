@@ -109,7 +109,6 @@ async function setCurrentDoorState(doorAccessory) {
 
   setInterval(async function() {
     const doorState = await currentDoorState();
-    debug('setCurrentDoorState: doorState', doorState);
 
     doorAccessory
       .getService(Service.GarageDoorOpener)
