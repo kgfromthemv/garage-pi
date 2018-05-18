@@ -111,13 +111,13 @@ async function setCurrentDoorState(doorAccessory) {
     
     debug('setCurrentDoorState: doorState', doorState);
 
-  setInterval(async function() {
-    const doorState = await doorState();
+  // setInterval(async function() {
+  //   const doorState = await doorState();
 
-    doorAccessory
-      .getService(Service.GarageDoorOpener)
-      .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-  }, 10000);
+  //   doorAccessory
+  //     .getService(Service.GarageDoorOpener)
+  //     .setCharacteristic(Characteristic.CurrentDoorState, doorState);
+  // }, 10000);
 }
 
 controller();
