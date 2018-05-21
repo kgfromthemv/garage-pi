@@ -46,9 +46,8 @@ async function controller() {
         doorAccessory
           .getService(Service.GarageDoorOpener)
           .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
-        debug('after CLOSING, before callback()')
+
         callback();
-        debug('after CLOSING callback()')
 
         await doorController.openDoor();
 
@@ -62,9 +61,8 @@ async function controller() {
         doorAccessory
           .getService(Service.GarageDoorOpener)
           .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
-        debug('after OPENING, before callback()')
+
         callback();
-        debug('after OPENING callback()')
 
         await doorController.closeDoor();
 
