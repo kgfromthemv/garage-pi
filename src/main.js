@@ -133,13 +133,14 @@ async function controller() {
 
 async function setCurrentDoorState(doorAccessory, now) {
   
-  const currentDoorState = () => await doorController.isDoorOpened()
+  const currentDoorState = () => doorController.isDoorOpened()
     ? Characteristic.CurrentDoorState.OPEN
-    : Characteristic.CurrentDoorState.CLOSED;    
+    : Characteristic.CurrentDoorState.CLOSED;
+
+    const doorState = await currentDoorState();
 
     if (now) {
 
-      const doorState = await currentDoorState();
       debug('manual door state refresh', doorState);
         doorAccessory
           .getService(Service.GarageDoorOpener)
@@ -148,7 +149,6 @@ async function setCurrentDoorState(doorAccessory, now) {
     } else {
 
       setInterval(async function() {
-        const doorState = await currentDoorState();
         debug('hourly door state refresh');
         doorAccessory
           .getService(Service.GarageDoorOpener)
