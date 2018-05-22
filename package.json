@@ -19,6 +19,7 @@
     "hap-nodejs": "^0.4.25",
     "rpi-gpio": "https://github.com/jordancn/rpi-gpio.js.git",
     "shelljs": "^0.7.8",
-    "temp": "^0.8.3"
+    "temp": "^0.8.3",
+    "test": "^0.6.0"
   }
 }
