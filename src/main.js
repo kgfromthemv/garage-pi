@@ -4,7 +4,6 @@ import doorController from './door';
 import config from '../config.json';
 import Camera from './camera';
 const debug = require('debug')('controller:main');
-const Events = require('events');
 
 storage.initSync();
 
@@ -47,14 +46,6 @@ async function controller() {
 
   const initialDoorState = await doorState();
   debug('initial door state', initialDoorState);
-
-  var toggleState = 'closed'
-  Events.on('opened', () => {
-    toggleState = 'open'
-});
-  Events.on('closed', () => {
-    toggleState = 'closed'
-});
 
   doorAccessory
         .addService(Service.GarageDoorOpener, 'Garage Door')
