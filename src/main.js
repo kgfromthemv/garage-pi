@@ -45,26 +45,16 @@ async function controller() {
   const initialDoorState = await doorState();
   debug('initial door state', initialDoorState);
 
-  var statusChange = true
   doorAccessory
         .addService(Service.GarageDoorOpener, 'Garage Door')
         .setCharacteristic(Characteristic.TargetDoorState, initialDoorState)
         .getCharacteristic(Characteristic.TargetDoorState)
     .on('set', async function(value, callback) {
-      statusChange = true
       if (value == Characteristic.TargetDoorState.CLOSED) {
         doorAccessory
             .getService(Service.GarageDoorOpener)
             .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
         callback();
-
-        setTimeout(() => {
-            if (statusChange) {
-                doorAccessory
-                    .getService(Service.GarageDoorOpener)
-                    .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPEN);
-            }
-        }, 20000);
 
         await doorController.openDoor();
 
@@ -80,14 +70,6 @@ async function controller() {
             .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
         callback();
 
-        setTimeout(() => {
-            if (statusChange) {
-                doorAccessory
-                    .getService(Service.GarageDoorOpener)
-                    .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPEN);
-            }
-        }, 20000);
-
         await doorController.closeDoor();
 
         const doorState = await doorState();
@@ -96,14 +78,6 @@ async function controller() {
             .getService(Service.GarageDoorOpener)
             .setCharacteristic(Characteristic.CurrentDoorState, doorState);
     }
-
-    doorAccessory
-        .getService(Service.GarageDoorOpener)
-        .getCharacteristic(Characteristic.CurrentDoorState)
-        .on('set', async function(newValue, callback) {
-            statusChange = false
-            callback()
-        });
 });
 
   doorAccessory
