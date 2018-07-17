@@ -22,10 +22,8 @@ async function controller() {
   const doorAccessory = exports.accessory = new Accessory(config.door.accessory.name, doorUUID);
 
   const cameraSource = new Camera();
-
   const cameraUUID = uuid.generate(`hap-nodejs:accessories:${config.camera.accessory.name}`);
   const cameraAccessory = exports.camera = new Accessory(config.camera.accessory.name, cameraUUID);
-
 
   // Door Accessory
 
@@ -47,24 +45,25 @@ async function controller() {
   const initialDoorState = await doorState();
   debug('initial door state', initialDoorState);
 
+  var statusChange = true
   doorAccessory
         .addService(Service.GarageDoorOpener, 'Garage Door')
         .setCharacteristic(Characteristic.TargetDoorState, initialDoorState)
         .getCharacteristic(Characteristic.TargetDoorState)
     .on('set', async function(value, callback) {
-
+      statusChange = true
       if (value == Characteristic.TargetDoorState.CLOSED) {
         doorAccessory
             .getService(Service.GarageDoorOpener)
             .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
         callback();
 
-        setTimeout(async function() {
-            const doorState = await doorState();
-            doorAccessory
-                .getService(Service.GarageDoorOpener)
-                .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-            callback();
+        setTimeout(() => {
+            if (statusChange) {
+                doorAccessory
+                    .getService(Service.GarageDoorOpener)
+                    .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPEN);
+            }
         }, 20000);
 
         await doorController.openDoor();
@@ -81,12 +80,12 @@ async function controller() {
             .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
         callback();
 
-        setTimeout(async function() {
-            const doorState = await doorState();
-            doorAccessory
-                .getService(Service.GarageDoorOpener)
-                .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-            callback();
+        setTimeout(() => {
+            if (statusChange) {
+                doorAccessory
+                    .getService(Service.GarageDoorOpener)
+                    .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPEN);
+            }
         }, 20000);
 
         await doorController.closeDoor();
@@ -97,8 +96,15 @@ async function controller() {
             .getService(Service.GarageDoorOpener)
             .setCharacteristic(Characteristic.CurrentDoorState, doorState);
     }
-});
 
+    doorAccessory
+        .getService(Service.GarageDoorOpener)
+        .getCharacteristic(Characteristic.CurrentDoorState)
+        .on('set', async function(newValue, callback) {
+            statusChange = false
+            callback()
+        });
+});
 
   doorAccessory
     .getService(Service.GarageDoorOpener)
