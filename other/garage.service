@@ -1,0 +1,17 @@
+[Unit]
+Description=Garage Door HomeKit Controller
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/garage-pi
+ExecStart=/usr/bin/yarn controller
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=garagepi
+User=root
+Group=root
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
