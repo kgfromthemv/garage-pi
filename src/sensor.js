@@ -9,16 +9,20 @@ gpio.setMode(gpio.MODE_RPI);
 
 const readValue = () => {
     return new Promise((fulfill, reject) => {
-        gpio.setup(config.door.pins.closed, gpio.DIR_IN, function () {
-            gpio.read(config.door.pins.closed, function(err, value) {
-                debug('readValue', value);
-                if (err) {
-                    debug('gpio read error', err);
-                    reject(err);
-                } else {
-                    fulfill(value);
-                }
-            });
+        gpio.setup(config.door.pins.closed, gpio.DIR_IN, function (err) {
+            if (err){
+                debug('gpio setup error', err)
+            } else {
+                gpio.read(config.door.pins.closed, function(err, value) {
+                    debug('readValue', value);
+                    if (err) {
+                        debug('gpio read error', err);
+                        reject(err);
+                    } else {
+                        fulfill(value);
+                    }
+                });
+            }
         });
     })
 }
