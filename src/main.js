@@ -48,7 +48,7 @@ async function controller() {
   const initialDoorState = await doorState();
   debug('initial door state', initialDoorState);
 
-  const toggleState = 'closed'
+  var toggleState = 'closed'
   Events.on('opened', () => {
     toggleState = 'open'
 });
