@@ -38,7 +38,7 @@ async function controller() {
     callback();
 });
 
-  const doorState = () => doorController.isDoorOpened()
+  const doorState = async () => await doorController.isDoorOpened()
   ? Characteristic.TargetDoorState.OPEN
   : Characteristic.TargetDoorState.CLOSED;
 
@@ -50,21 +50,29 @@ async function controller() {
         .setCharacteristic(Characteristic.TargetDoorState, initialDoorState)
         .getCharacteristic(Characteristic.TargetDoorState)
     .on('set', async function(value, callback) {
+      let curDoorState = await doorState();
+
       if (value == Characteristic.TargetDoorState.CLOSED) {
-        doorAccessory
-            .getService(Service.GarageDoorOpener)
-            .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
-        callback();
+
+        if ([Characteristic.TargetDoorState.CLOSED, Characteristic.TargetDoorState.CLOSING].indexOf(curDoorState) < 0) {
+            doorAccessory
+                .getService(Service.GarageDoorOpener)
+                .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
+            callback();
 
         await doorController.openDoor();
 
-        const doorState = await doorState();
+        curDoorState = await doorState();
 
         doorAccessory
             .getService(Service.GarageDoorOpener)
-            .setCharacteristic(Characteristic.CurrentDoorState, doorState);
-    }
-    else if (value == Characteristic.TargetDoorState.OPEN) {
+            .setCharacteristic(Characteristic.CurrentDoorState, curDoorState);
+        } else {
+            debug('ALREADY CLOSED; staying closed');
+            callback();
+        }
+    } else if (value == Characteristic.TargetDoorState.OPEN) {
+        if ([Characteristic.TargetDoorState.OPEN, Characteristic.TargetDoorState.OPENING].indexOf(curDoorState) < 0) {
         doorAccessory
             .getService(Service.GarageDoorOpener)
             .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
@@ -72,11 +80,15 @@ async function controller() {
 
         await doorController.closeDoor();
 
-        const doorState = await doorState();
+        curDoorState = await doorState();
 
         doorAccessory
             .getService(Service.GarageDoorOpener)
-            .setCharacteristic(Characteristic.CurrentDoorState, doorState);
+            .setCharacteristic(Characteristic.CurrentDoorState, curDoorState);
+        } else {
+            debug('ALREADY OPEN; staying open');
+            callback();
+        }
     }
 });
 
