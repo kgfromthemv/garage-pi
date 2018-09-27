@@ -1,10 +1,10 @@
 import { Accessory, Service, Characteristic, uuid, Camera } from 'hap-nodejs';
+import { spawn } from 'child_process';
 import shell from 'shelljs';
 import * as fs from 'fs';
 import * as temp from 'temp';
 import config from '../config.json';
 
-const { spawn } = require('child_process');
 const debug = require('debug')('controller:camera');
 
 const snapshotFileName = temp.path({ suffix: '.jpg' });

@@ -26,7 +26,7 @@
       "width": 640,
       "height": 400,
       "fps": 15,
-      "bitrate": 100,
+      "bitrate": 500,
       "rotation": 180
     }
   }
