@@ -2,6 +2,7 @@ import { Accessory, Service, Characteristic, uuid } from 'hap-nodejs';
 import storage from 'node-persist';
 import doorController from './door';
 import config from '../config.json';
+import Camera from './camera';
 const debug = require('debug')('controller:main');
 
 storage.initSync();
@@ -11,73 +12,87 @@ debug(`accessory username: ${config.door.accessory.username}`);
 debug(`accessory pincode: ${config.door.accessory.pincode}`);
 debug(`accessory port: ${config.door.accessory.port}`);
 
+debug(`camera name: ${config.camera.accessory.name}`);
+debug(`camera username: ${config.camera.accessory.username}`);
+debug(`camera pincode: ${config.camera.accessory.pincode}`);
+debug(`camera port: ${config.camera.accessory.port}`);
+
 async function controller() {
-    const doorUUID = uuid.generate(`hap-nodejs:accessories:${config.door.accessory.name}`);
-    const doorAccessory = exports.accessory = new Accessory(config.door.accessory.name, doorUUID);
+  const doorUUID = uuid.generate(`hap-nodejs:accessories:${config.door.accessory.name}`);
+  const doorAccessory = exports.accessory = new Accessory(config.door.accessory.name, doorUUID);
 
-// Door Accessory
+  const cameraSource = new Camera();
+  const cameraUUID = uuid.generate(`hap-nodejs:accessories:${config.camera.accessory.name}`);
+  const cameraAccessory = exports.camera = new Accessory(config.camera.accessory.name, cameraUUID);
 
-doorAccessory.getService(Service.AccessoryInformation)
-    .setCharacteristic(Characteristic.Manufacturer, 'Overhead Door')
-    .setCharacteristic(Characteristic.Model, '4040L')
-    .setCharacteristic(Characteristic.SerialNumber, 'Serial Number');
+  // Door Accessory
 
-    doorAccessory.on('identify', function (paired, callback) {
-        doorController.identify();
-        callback();
-    });
+  doorAccessory
+        .getService(Service.AccessoryInformation)
+        .setCharacteristic(Characteristic.Manufacturer, 'Overhead Door')
+        .setCharacteristic(Characteristic.Model, '4040L')
+        .setCharacteristic(Characteristic.SerialNumber, 'Serial Number');
 
-    const doorState = async () => await doorController.isDoorOpened() ? Characteristic.TargetDoorState.OPEN : Characteristic.TargetDoorState.CLOSED;
+  doorAccessory.on('identify', function (paired, callback) {
+    doorController.identify();
+    callback();
+});
 
-    const initialDoorState = await doorState();
-    debug('initial door state', initialDoorState);
+  const doorState = async () => await doorController.isDoorOpened()
+  ? Characteristic.TargetDoorState.OPEN
+  : Characteristic.TargetDoorState.CLOSED;
 
-    doorAccessory.addService(Service.GarageDoorOpener, 'Garage Door')
-    .setCharacteristic(Characteristic.TargetDoorState, initialDoorState)
-    .getCharacteristic(Characteristic.TargetDoorState)
+  const initialDoorState = await doorState();
+  debug('initial door state', initialDoorState);
+
+  doorAccessory
+        .addService(Service.GarageDoorOpener, 'Garage Door')
+        .setCharacteristic(Characteristic.TargetDoorState, initialDoorState)
+        .getCharacteristic(Characteristic.TargetDoorState)
     .on('set', async function(value, callback) {
-        let curDoorState = await doorState();
+      let curDoorState = await doorState();
 
-        if (value == Characteristic.TargetDoorState.CLOSED) {
+      if (value == Characteristic.TargetDoorState.CLOSED) {
 
-            if ([Characteristic.TargetDoorState.CLOSED, Characteristic.TargetDoorState.CLOSING].indexOf(curDoorState) < 0) {
-                doorAccessory.getService(Service.GarageDoorOpener)
+        if ([Characteristic.TargetDoorState.CLOSED, Characteristic.TargetDoorState.CLOSING].indexOf(curDoorState) < 0) {
+            doorAccessory
+                .getService(Service.GarageDoorOpener)
                 .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
-                callback();
+            callback();
 
-                await doorController.openDoor();
+        await doorController.openDoor();
 
-                curDoorState = await doorState();
+        curDoorState = await doorState();
 
-                doorAccessory
-                .getService(Service.GarageDoorOpener)
-                .setCharacteristic(Characteristic.CurrentDoorState, curDoorState);
-            } else {
-                debug('ALREADY CLOSED; staying closed');
-                callback();
-            }
-        } else if (value == Characteristic.TargetDoorState.OPEN) {
-            if ([Characteristic.TargetDoorState.OPEN, Characteristic.TargetDoorState.OPENING].indexOf(curDoorState) < 0) {
-                doorAccessory
-                .getService(Service.GarageDoorOpener)
-                .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
-                callback();
-
-                await doorController.closeDoor();
-
-                curDoorState = await doorState();
-
-                doorAccessory
-                .getService(Service.GarageDoorOpener)
-                .setCharacteristic(Characteristic.CurrentDoorState, curDoorState);
-            } else {
-                debug('ALREADY OPEN; staying open');
-                callback();
-            }
+        doorAccessory
+            .getService(Service.GarageDoorOpener)
+            .setCharacteristic(Characteristic.CurrentDoorState, curDoorState);
+        } else {
+            debug('ALREADY CLOSED; staying closed');
+            callback();
         }
-    });
+    } else if (value == Characteristic.TargetDoorState.OPEN) {
+        if ([Characteristic.TargetDoorState.OPEN, Characteristic.TargetDoorState.OPENING].indexOf(curDoorState) < 0) {
+        doorAccessory
+            .getService(Service.GarageDoorOpener)
+            .setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
+        callback();
 
-    doorAccessory
+        await doorController.closeDoor();
+
+        curDoorState = await doorState();
+
+        doorAccessory
+            .getService(Service.GarageDoorOpener)
+            .setCharacteristic(Characteristic.CurrentDoorState, curDoorState);
+        } else {
+            debug('ALREADY OPEN; staying open');
+            callback();
+        }
+    }
+});
+
+  doorAccessory
     .getService(Service.GarageDoorOpener)
     .getCharacteristic(Characteristic.CurrentDoorState)
     .on('get', async function(callback) {
@@ -91,16 +106,31 @@ doorAccessory.getService(Service.AccessoryInformation)
             debug('door is closed');
             callback(err, Characteristic.CurrentDoorState.CLOSED);
         }
-    });
+});
 
+    // Camera Accessory
 
-    debug('publish door accessory');
-    doorAccessory.publish({
-        port: config.door.accessory.port,
-        username: config.door.accessory.username,
-        pincode: config.door.accessory.pincode,
-        category: Accessory.Categories.GARAGE_DOOR_OPENER,
-    });
+    cameraAccessory.configureCameraSource(cameraSource);
+
+    cameraAccessory.identify, (paired, callback) => {
+        callback();
+    }
+
+debug('publish door accessory');
+doorAccessory.publish({
+    port: config.door.accessory.port,
+    username: config.door.accessory.username,
+    pincode: config.door.accessory.pincode,
+    category: Accessory.Categories.GARAGE_DOOR_OPENER,
+});
+
+debug('publish camera accessory');
+cameraAccessory.publish({
+    port: config.camera.accessory.port,
+    username: config.camera.accessory.username,
+    pincode: config.camera.accessory.pincode,
+    category: Accessory.Categories.CAMERA,
+});
 }
 
 controller();
