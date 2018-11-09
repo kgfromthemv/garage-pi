@@ -24,9 +24,9 @@
     },
     "stream": {
       "width": 640,
-      "height": 400,
-      "fps": 15,
-      "bitrate": 100,
+      "height": 480,
+      "fps": 10,
+      "bitrate": 1000,
       "rotation": 180
     }
   }
