@@ -53,7 +53,8 @@ Camera.prototype.handleStreamRequest = function(request) {
         const fps = config.camera.stream.fps;
         const bitrate = config.camera.stream.bitrate;
 
-        let targetAddress = sessionInfo['address'];
+        // let targetAddress = sessionInfo['address'];
+        let targetAddress = '192.168.86.175';
         let targetVideoPort = sessionInfo['video_port'];
         let videoKey = sessionInfo['video_srtp'];
 
