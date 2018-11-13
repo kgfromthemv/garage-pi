@@ -107,6 +107,11 @@ async function controller() {
             callback(err, Characteristic.CurrentDoorState.CLOSED);
         }
 });
+  let curDoorState = await doorState()
+  doorAccessory
+    .getService(Service.GarageDoorOpener)
+    .getCharacteristic(Characteristic.CurrentDoorState)
+    .setValue(curDoorState)
 
     // Camera Accessory
 
