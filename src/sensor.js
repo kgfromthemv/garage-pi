@@ -1,6 +1,6 @@
 import gpio from 'rpi-gpio';
 import config from '../config.json';
-import * as _ from 'lodash';
+
 const debug = require('debug')('controller:sensor');
 
 const closedPin = config.door.pins.closed;
@@ -8,31 +8,28 @@ const closedPin = config.door.pins.closed;
 gpio.setMode(gpio.MODE_RPI);
 
 const readValue = () => {
-    return new Promise((fulfill, reject) => {
-        gpio.setup(config.door.pins.closed, gpio.DIR_IN, function (err) {
-            if (err){
-                debug('gpio setup error', err)
-            } else {
-                gpio.read(config.door.pins.closed, function(err, value) {
-                    debug('readValue', value);
-                    if (err) {
-                        debug('gpio read error', err);
-                        reject(err);
-                    } else {
-                        fulfill(value);
-                    }
-                });
-            }
-        });
-    })
+    gpio.setup(closedPin, gpio.DIR_IN, function (err) {
+        if (err) {
+            debug('gpio setup error', err)
+        } else {
+            gpio.read(closedPin, function (err, value) {
+                debug('readValue', value);
+                if (err) {
+                    debug('gpio read error', err);
+                } else {
+                    return value;
+                }
+            });
+        }
+    });
 }
 
-const isDoorClosed = async () => {
-    const status = await readValue();
+function isDoorClosed() {
+    const status = readValue();
 
     debug('isDoorClosed', status);
 
     return status;
 }
 
-export default { isDoorClosed };
+export default {isDoorClosed};

@@ -20,14 +20,8 @@ const door = {
     debug('identify');
   },
 
-  isDoorOpened: async function () {
-    debug('isDoorOpened');
-
-    const closed = await Sensor.isDoorClosed();
-
-    debug('isDoorOpened', !closed);
-
-    return !closed;
+  isDoorClosed: function () {
+    return Sensor.isDoorClosed();
   }
 };
 
